@@ -1,0 +1,15 @@
+{
+  "index": "Introduction",
+  "another": "Guides",
+  "qbcore": "QB-Core",
+  "about": {
+    "title": "About",
+    "type": "page"
+  },
+  "contact": {
+    "title": "Contact ↗",
+    "type": "page",
+    "href": "https://discord.gg/gGG2uKt2us",
+    "newWindow": true
+  }
+}

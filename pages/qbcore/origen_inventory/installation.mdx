@@ -1,0 +1,297 @@
+import { Steps } from 'nextra/components'
+import { Tabs, Tab } from 'nextra-theme-docs';
+
+# Installation
+
+<Steps>
+### Step 1 - Start Order
+
+In order for the resource to start correctly and not receive any errors, we must start the resources in the following order
+
+```cfg {3-4} showLineNumbers filename="server.cfg"
+ensure qb-core
+...
+ensure origen_inventory
+```
+
+### Step 2 - Replace Exports
+
+<Tabs items={["Client", "Server"]}>
+<Tab>
+
+#### QBCore.Functions.HasItem ```qb-core/client/functions.lua```
+```lua {4} showLineNumbers filename="qb-core/client/functions.lua"
+---@param items string
+---@param amount number
+function QBCore.Functions.HasItem(items, amount)
+    return exports['qb-inventory']:HasItem(items, amount)
+end
+```
+To: 
+```lua {4} showLineNumbers filename="qb-core/client/functions.lua"
+---@param items string
+---@param amount number
+function QBCore.Functions.HasItem(items, amount)
+    return exports['origen_inventory']:HasItem(items, amount)
+end
+```
+</Tab>
+<Tab>
+
+#### QBCore.Functions.UseItem ```qb-core/server/functions.lua```
+```lua {4-5} showLineNumbers filename="qb-core/server/functions.lua"
+---@param source any
+---@param item string
+    function QBCore.Functions.UseItem(source, item)
+    if GetResourceState('qb-inventory') == 'missing' then return end
+    exports['qb-inventory']:UseItem(source, item)
+end
+```
+
+To:
+
+```lua {4-5} showLineNumbers filename="qb-core/server/functions.lua"
+---@param source any
+---@param item string
+function QBCore.Functions.UseItem(source, item)
+    if GetResourceState('origen_inventory') == 'missing' then return end
+    exports['origen_inventory']:UseItem(source, item)
+end
+```
+
+#### QBCore.Functions.HasItem ```qb-core/server/functions.lua```
+
+```lua {4} showLineNumbers filename="qb-core/server/functions.lua"
+---@param source any
+---@param items string
+---@param amount number
+---@return boolean
+function QBCore.Functions.HasItem(source, items, amount)
+    if GetResourceState('qb-inventory') == 'missing' then return end
+    return exports['qb-inventory']:HasItem(source, items, amount)
+end
+```
+
+To:
+
+```lua {4} showLineNumbers filename="qb-core/server/functions.lua"
+---@param source any
+---@param items string
+---@param amount number
+---@return boolean
+function QBCore.Functions.HasItem(source, items, amount)
+    if GetResourceState('origen_inventory') == 'missing' then return end
+    return exports['origen_inventory']:HasItem(source, items, amount)
+end
+```
+
+#### QBCore.Player.CheckPlayerData ```qb-core/server/player.lua```
+
+```lua {5} showLineNumbers filename="qb-core/server/player.lua"
+---@param source any
+---@param PlayerData table
+function QBCore.Player.CheckPlayerData(source, PlayerData)
+    ...
+    -- Other
+    PlayerData.position = PlayerData.position or QBConfig.DefaultSpawn
+    PlayerData.items = GetResourceState('qb-inventory') ~= 'missing' and exports['qb-inventory']:LoadInventory(PlayerData.source, PlayerData.citizenid) or {}
+    return QBCore.Player.CreatePlayer(PlayerData, Offline)
+end
+```
+
+To:
+
+```lua {5} showLineNumbers filename="qb-core/server/player.lua"
+---@param source any
+---@param PlayerData table
+function QBCore.Player.CheckPlayerData(source, PlayerData)
+    ...
+    -- Other
+    PlayerData.position = PlayerData.position or QBConfig.DefaultSpawn
+    PlayerData.items = GetResourceState('origen_inventory') ~= 'missing' and exports['origen_inventory']:LoadInventory(PlayerData.source, PlayerData.citizenid) or {}
+    return QBCore.Player.CreatePlayer(PlayerData, Offline)
+end
+```
+
+#### self.Functions.GetCardSlot ```qb-core/server/player.lua```
+
+```lua {5} showLineNumbers filename="qb-core/server/player.lua"
+---@param cardNumber string
+---@param cardType string
+function self.Functions.GetCardSlot(cardNumber, cardType)
+        local item = tostring(cardType):lower()
+        local slots = exports['qb-inventory']:GetSlotsByItem(self.PlayerData.items, item)
+        for _, slot in pairs(slots) do
+            if slot then
+                if self.PlayerData.items[slot].info.cardNumber == cardNumber then
+                    return slot
+                end
+            end
+        end
+        return nil
+    end
+```
+
+To:
+
+```lua {5} showLineNumbers filename="qb-core/server/player.lua"
+---@param cardNumber string
+---@param cardType string
+function self.Functions.GetCardSlot(cardNumber, cardType)
+        local item = tostring(cardType):lower()
+        local slots = exports['origen_inventory']:GetSlotsByItem(self.PlayerData.items, item)
+        for _, slot in pairs(slots) do
+            if slot then
+                if self.PlayerData.items[slot].info.cardNumber == cardNumber then
+                    return slot
+                end
+            end
+        end
+        return nil
+    end
+```
+
+#### QBCore.Player.Save ```qb-core/server/player.lua```
+
+```lua {7} showLineNumbers filename="qb-core/server/player.lua"
+---@param source any
+function QBCore.Player.Save(source)
+    local ped = GetPlayerPed(source)
+    local pcoords = GetEntityCoords(ped)
+    local PlayerData = QBCore.Players[source].PlayerData
+    if PlayerData then
+        ...
+        if GetResourceState('qb-inventory') ~= 'missing' then exports['qb-inventory']:SaveInventory(source) end
+        QBCore.ShowSuccess(GetCurrentResourceName(), PlayerData.name .. ' PLAYER SAVED!')
+    else
+        QBCore.ShowError(GetCurrentResourceName(), 'ERROR QBCORE.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
+    end
+end
+```
+
+To:
+
+```lua {7} showLineNumbers filename="qb-core/server/player.lua"
+---@param source any
+function QBCore.Player.Save(source)
+    local ped = GetPlayerPed(source)
+    local pcoords = GetEntityCoords(ped)
+    local PlayerData = QBCore.Players[source].PlayerData
+    if PlayerData then
+        ...
+        if GetResourceState('origen_inventory') ~= 'missing' then exports['origen_inventory']:SaveInventory(source) end
+        QBCore.ShowSuccess(GetCurrentResourceName(), PlayerData.name .. ' PLAYER SAVED!')
+    else
+        QBCore.ShowError(GetCurrentResourceName(), 'ERROR QBCORE.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
+    end
+end
+```
+
+#### QBCore.Player.SaveOffline ```qb-core/server/player.lua```
+
+
+```lua {4} showLineNumbers filename="qb-core/server/player.lua"
+---@param PlayerData table
+function QBCore.Player.SaveOffline(PlayerData)
+    if PlayerData then
+       ...
+        if GetResourceState('qb-inventory') ~= 'missing' then exports['qb-inventory']:SaveInventory(PlayerData, true) end
+        QBCore.ShowSuccess(GetCurrentResourceName(), PlayerData.name .. ' OFFLINE PLAYER SAVED!')
+    else
+        QBCore.ShowError(GetCurrentResourceName(), 'ERROR QBCORE.PLAYER.SAVEOFFLINE - PLAYERDATA IS EMPTY!')
+    end
+end
+```
+
+To:
+
+
+```lua {4} showLineNumbers filename="qb-core/server/player.lua"
+---@param PlayerData table
+function QBCore.Player.SaveOffline(PlayerData)
+    if PlayerData then
+       ...
+        if GetResourceState('origen_inventory') ~= 'missing' then exports['origen_inventory']:SaveInventory(PlayerData, true) end
+        QBCore.ShowSuccess(GetCurrentResourceName(), PlayerData.name .. ' OFFLINE PLAYER SAVED!')
+    else
+        QBCore.ShowError(GetCurrentResourceName(), 'ERROR QBCORE.PLAYER.SAVEOFFLINE - PLAYERDATA IS EMPTY!')
+    end
+end
+```
+
+#### Backward Compatibility ```qb-core/server/player.lua```
+
+```lua {3, 8, 13, 18, 23} showLineNumbers filename="qb-core/server/player.lua"
+---@param source any
+function QBCore.Player.SaveInventory(source)
+    if GetResourceState('qb-inventory') == 'missing' then return end
+    exports['qb-inventory']:SaveInventory(source, false)
+end
+
+---@param PlayerData table
+function QBCore.Player.SaveOfflineInventory(PlayerData)
+    if GetResourceState('qb-inventory') == 'missing' then return end
+    exports['qb-inventory']:SaveInventory(PlayerData, true)
+end
+---@param items table
+function QBCore.Player.GetTotalWeight(items)
+    if GetResourceState('qb-inventory') == 'missing' then return end
+    return exports['qb-inventory']:GetTotalWeight(items)
+end
+---@param items table
+---@param itemName string
+function QBCore.Player.GetSlotsByItem(items, itemName)
+    if GetResourceState('qb-inventory') == 'missing' then return end
+    return exports['qb-inventory']:GetSlotsByItem(items, itemName)
+end
+---@param items table
+---@param itemName string
+function QBCore.Player.GetFirstSlotByItem(items, itemName)
+    if GetResourceState('qb-inventory') == 'missing' then return end
+    return exports['qb-inventory']:GetFirstSlotByItem(items, itemName)
+end
+```
+
+To:
+
+```lua {3, 8, 13, 18, 23} showLineNumbers filename="qb-core/server/player.lua"
+---@param source any
+function QBCore.Player.SaveInventory(source)
+    if GetResourceState('origen_inventory') == 'missing' then return end
+    exports['origen_inventory']:SaveInventory(source, false)
+end
+
+---@param PlayerData table
+function QBCore.Player.SaveOfflineInventory(PlayerData)
+    if GetResourceState('origen_inventory') == 'missing' then return end
+    exports['origen_inventory']:SaveInventory(PlayerData, true)
+end
+
+---@param items table
+function QBCore.Player.GetTotalWeight(items)
+    if GetResourceState('origen_inventory') == 'missing' then return end
+    return exports['origen_inventory']:GetTotalWeight(items)
+end
+
+---@param items table
+---@param itemName string
+function QBCore.Player.GetSlotsByItem(items, itemName)
+    if GetResourceState('origen_inventory') == 'missing' then return end
+    return exports['origen_inventory']:GetSlotsByItem(items, itemName)
+end
+
+---@param items table
+---@param itemName string
+function QBCore.Player.GetFirstSlotByItem(items, itemName)
+    if GetResourceState('origen_inventory') == 'missing' then return end
+    return exports['origen_inventory']:GetFirstSlotByItem(items, itemName)
+end
+```
+
+
+</Tab>
+</Tabs>
+
+
+
+</Steps>

@@ -1,0 +1,1096 @@
+import { Steps } from 'nextra/components'
+
+# Installation
+
+<Steps>
+### Step 1 - Start Order
+
+In order for the resource to start correctly and not receive any errors, we must start the resources in the following order
+
+```cfg {3-4} showLineNumbers filename="server.cfg"
+ensure qb-core
+...
+ensure origen_police
+ensure origen_menu
+```
+
+### Step 2 - Setup SQL
+
+For the resource to work correctly, you need to import the SQL file into your database. You can find this file in the ```origen_police/sql.sql``` folder of the resource.
+
+### Step 3 - Setup items
+
+Add the following to  ```qb-core/shared/items.lua```.
+
+```lua
+['instant_camera']         = {['name'] = 'instant_camera',         ['label'] = 'Instant camera',      ['weight'] = 0,      ['type'] = 'item',    ['image'] = 'polaroid.png',          ['unique'] = true,     ['useable'] = true,  ['shouldClose'] = false,   ['combinable'] = nil,   ['description'] = 'A simple camera designed to take photos at a crime scene'},
+['photo']   = {['name'] = 'photo',   ['label'] = 'Photo',      ['weight'] = 0,      ['type'] = 'item',    ['image'] = 'photos.png',       ['unique'] = true,     ['useable'] = true,  ['shouldClose'] = false,   ['combinable'] = nil,   ['description'] = 'An image'},
+['evidence_a']   = {["name"] = "evidence_a",   ["label"] = "Evidence of bullet",     ["weight"] = 0,      ["type"] = "item",     ["image"] = "evidence_a.png",      ["unique"] = true,    ["useable"] = false,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Evidence obtained from a crime scene"},
+['evidence_az']  = {["name"] = "evidence_az",   ["label"] = "Evidence",   ["weight"] = 0,      ["type"] = "item",     ["image"] = "evidence_az.png",      ["unique"] = true,    ["useable"] = false,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Evidence obtained from a crime scene"},
+['evidence_b']   = {["name"] = "evidence_b",   ["label"] = "Vehicle evidence",     ["weight"] = 0,      ["type"] = "item",     ["image"] = "evidence_b.png",      ["unique"] = true,    ["useable"] = false,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Evidence obtained from a crime scene"},
+['evidence_n']   = {["name"] = "evidence_n",   ["label"] = "Impact evidence",     ["weight"] = 0,      ["type"] = "item",     ["image"] = "evidence_n.png",      ["unique"] = true,    ["useable"] = false,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Evidence obtained from a crime scene"},
+['evidence_ne']  = {["name"] = "evidence_ne",   ["label"] = "Footprint evidence",     ["weight"] = 0,      ["type"] = "item",     ["image"] = "evidence_ne.png",      ["unique"] = true,    ["useable"] = false,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Evidence obtained from a crime scene"},
+['evidence_r']   = {["name"] = "evidence_r",   ["label"] = "Blood evidence",      ["weight"] = 0,      ["type"] = "item",     ["image"] = "evidence_r.png",      ["unique"] = true,    ["useable"] = false,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Evidence obtained from a crime scene"},
+['evidence_ro']  = {["name"] = "evidence_ro",   ["label"] = "Evidence",   ["weight"] = 0,      ["type"] = "item",     ["image"] = "evidence_ro.png",      ["unique"] = true,    ["useable"] = false,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Evidence obtained from a crime scene"},
+['evidence_v']   = {["name"] = "evidence_v",   ["label"] = "Drug evidence",      ["weight"] = 0,      ["type"] = "item",     ["image"] = "evidence_v.png",      ["unique"] = true,    ["useable"] = false,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Evidence obtained from a crime scene"},
+['report_evidence']      = {["name"] = "report_evidence",  ["label"] = "Evidence report",     ["weight"] = 0,      ["type"] = "item",     ["image"] = "report_evidence.png",     ["unique"] = true,    ["useable"] = true,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Here there can be collected up to 4 pieces of evidence"},
+['k9']      = {["name"] = "k9",     ["label"] = "K9 whistle",    ["weight"] = 0,      ["type"] = "item",     ["image"] = "whistle.png",   ["unique"] = true,    ["useable"] = true,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Use the whistle to call the K9 unit"},
+['lspd_badge']    = {["name"] = "lspd_badge",   ["label"] = "Police badge",  ["weight"] = 0,      ["type"] = "item",     ["image"] = "lspd_badge.png",  ["unique"] = true,    ["useable"] = true,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Your identification as a police officer, includes your rank and badge number"},
+['bcsd_badge']    = {["name"] = "bcsd_badge",   ["label"] = "Sheriff badge",  ["weight"] = 0,      ["type"] = "item",     ["image"] = "bcsd_badge.png",  ["unique"] = true,    ["useable"] = true,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Your identification as a sheriff's agent, including your rank and badge number"},
+['police_cad']    = {["name"] = "police_cad",   ["label"] = "Police tablet",  ["weight"] = 0,      ["type"] = "item",     ["image"] = "tablet.png",  ["unique"] = true,    ["useable"] = true,  ["shouldClose"] = false,   ["combinable"] = nil,   ["description"] = "Your personal tablet with all the information of the San Andreas police"},
+```
+
+### Step 4 - Add Exports
+Put this exports on ```pma-voice/client/init/main.lua``` on the final of the file
+```lua showLineNumbers filename="main.lua"
+exports("toggleVoice", toggleVoice)
+exports("playerTargets", playerTargets)
+```
+
+### Step 5 - Setup Config
+ 
+In order for the script to function properly, you must change the Config.Framework setting to your framework in this case it will be "qb-core". Feel free to make any other necessary changes as well.
+
+```lua {4-5, 6-7} showLineNumbers filename="config.lua"
+
+Config = {}
+
+Config.Framework = "qbcore" -- qbcore or esx [Default: qbcore] (Select the framework)
+Config.CustomNotify = false -- true or false [Default: false] (Select if you want to use your own notification system)
+Config.Language = "en"
+Config.Inventory = "origen_inventory" -- set the name of your inventory script
+
+Config.BillsNPC = vector4(441.1431, -978.9520, 30.6896, 171.6890)
+
+Config.Vehicles = {
+    [GetHashKey("police")] = "car",
+    [GetHashKey("police2")] = "car",
+    [GetHashKey("police3")] = "car",
+    [GetHashKey("policeb")] = "car",
+
+    [GetHashKey("polmav")] = "heli",
+    [GetHashKey("predator")] = "boat",
+}
+
+Config.Translations = {
+    ["en"] = {
+        ["Reference"] = "REFERENCES",
+        ["Icons"] = "ICONS",
+        ["Colors"] = "COLORS",
+        ["RadialComm"] = "RADIAL COMMUNICATIONS",
+        ["Radio"] = "RADIO",
+        ["Disconnected"] = "DISCONNECTED",
+        ["SouthUnits"] = "SOUTH UNITS",
+        ["NorthUnits"] = "NORTH UNITS",
+        ["SpecialUnits"] = "SPECIAL UNITS",
+        ["EMSUnits"] = "EMS UNITS",
+        ["Interaction"] = "INTERACTION",
+        ["CitizenInteraction"] = "CITIZEN INTERACTION",
+        ["Search"] = "Search",
+        ["Wifes"] = "HANDCUFF",
+        ["Escort"] = "ESCORT",
+        ["PutInVehicle"] = "PUT/GET IN VEHICLE",
+        ["JumpTo"] = "JUMP TO",
+        ["HealWounds"] = "TO HEAL WOUNDS",
+        ["VehicleInteraction"] = "INTERACTION WITH VEHICLES",
+        ["VehicleInformation"] = "VEHICLE INFORMATION",
+        ["SeizeVehicle"] = "SEIZE VEHICLE",
+        ["ForceLock"] = "FORCE LOCK",
+        ["StopTraffic"] = "STOP TRAFFIC",
+        ["ReduceTraffic"] = "REDUCE TRAFFIC",
+        ["ResumeTraffic"] = "RESUME TRAFFIC",
+        ["Availabel"] = "AVAILABLE",
+        ["WeaponsConfiguration"] = "WEAPONS CONFIGURATION",
+        ["PistolPos"] = "PISTOL POSITION",
+        ["RiflePos"] = "RIFLE POSITION",
+        ["Front"] = "FRONT",
+        ["Behind"] = "BEHIND",
+        ["WaistCart"] = "WAIST CARTRIDGE",
+        ["NormalCart"] = "NORMAL CARTRIDGE",
+        ["ChestCart"] = "CHEST CARTRIDGE",
+        ["ThighCart"] = "THIGH CARTRIDGE",
+        ["LegCart"] = "LEG CARTRIDGE",
+        ["SeparateLegCart"] = "SEPARATE LEG CARTRIDGE",
+        ["Chest"] = "CHEST",
+        ["Back"] = "BACK",
+        ["PoliceObjects"] = "POLICE OBJECTS",
+        ["Cone"] = "CONE",
+        ["Barrier"] = "BARRIER",
+        ["Sign"] = "SIGN",
+        ["Spikes"] = "SPIKES",
+        ["Radar"] = "RADAR",
+        ["Delete"] = "DELETE",
+        ["Emergencies"] = "EMERGENCIES",
+        ["NoAlertRecived"] = "There are no alerts received",
+        ["Settings"] = "SETTINGS",
+        ["General"] = "General",
+        ["AlertsCode"] = "Alerts 488, 487, 487-V",
+        ["DrugTrafficking"] = "Drug trafficking",
+        ["VehicleRobs"] = "Vehicle robberies",
+        ["Alerts215"] = "Alerts 215 / Weapons",
+        ["Radars"] = "Radars",
+        ["KeyToAlert"] = "Key to go to the alert",
+        ["DeleteAlertKey"] = "Alert Deleye Key",
+        ["EmergencyOpenKey"] = "Emergencies opening key",
+        ["Equipment"] = "Equipment",
+        ["Cone"] = "Cone",
+        ["ConeDesc"] = "The cone",
+        ["Barriers"] = "Barreras",
+        ["BarriersDesc"] = "The barriers",
+        ["TrafficLights"] = "Traffic lights",
+        ["TrafficLightsDesc"] = "The traffic signs",
+        ["Spikes"] = "Spikes",
+        ["SpikesDesc"] = "The spikes",
+        ["Radar"] = "Radar",
+        ["RadarDesc"] = "The radar",
+        -- [""] = ""
+        -- [""] = ""
+        -- [""] = ""
+        -- [""] = ""
+        -- [""] = ""
+        -- [""] = ""
+        -- [""] = ""
+        -- [""] = ""
+    },
+}
+
+Config.Translations = Config.Translations[Config.Language] -- DON'T TOUCH THIS
+
+Config.Camara = {
+    fov_max = 80.0,
+    fov_min = 10.0,
+    zoomspeed = 5.0,
+    speed_lr = 5.0,
+    speed_ud = 5.0
+}
+
+Config.Sirens = {
+    "VEHICLES_HORNS_SIREN_1",
+    "VEHICLES_HORNS_SIREN_2"
+}
+
+Config.Armory = {
+    label = "Equipamiento",
+    items = {
+        {
+            name = "weapon_combatpistol",
+            price = 0,
+            amount = 1,
+            info = {
+                serie = "SAPD",
+                attachments = {
+                    {component = "COMPONENT_AT_PI_FLSH", label = "Flashlight"},
+                }
+            },
+            type = "weapon",
+            slot = 1,
+        },
+        {
+            name = "weapon_stungun",
+            price = 0,
+            amount = 1,
+            info = {
+                serie = "SAPD",
+            },
+            type = "weapon",
+            slot = 2,
+        },
+        {
+            name = "weapon_nightstick",
+            price = 0,
+            amount = 1,
+            info = {},
+            type = "weapon",
+            slot = 3,
+        },
+        {
+            name = "weapon_flashlight",
+            price = 0,
+            amount = 1,
+            info = {},
+            type = "weapon",
+            slot = 4,
+        },
+        {
+            name = "radio",
+            price = 0,
+            amount = 1,
+            info = {},
+            type = "item",
+            slot = 5,
+        },
+        {
+            name = "weapon_pumpshotgun",
+            price = 0,
+            amount = 1,
+            info = {
+                serie = "SAPD",
+                attachments = {
+                    {component = "COMPONENT_AT_AR_FLSH", label = "Flashlight"},
+                }
+            },
+            type = "weapon",
+            slot = 6,
+        },
+        {
+            name = "weapon_smg",
+            price = 0,
+            amount = 1,
+            info = {
+                serie = "SAPD",
+                attachments = {
+                    {component = "COMPONENT_AT_SCOPE_MACRO_02", label = "1x Scope"},
+                    {component = "COMPONENT_AT_AR_FLSH", label = "Flashlight"},
+                }
+            },
+            type = "weapon",
+            slot = 7,
+        },
+        {
+            name = "weapon_carbinerifle",
+            price = 0,
+            amount = 1,
+            info = {
+                serie = "SAPD",
+                attachments = {
+                    {component = "COMPONENT_AT_AR_FLSH", label = "Flashlight"},
+                    {component = "COMPONENT_AT_SCOPE_MEDIUM", label = "3x Scope"},
+                }
+            },
+            type = "weapon",
+            slot = 8,
+        },
+        {
+            name = "pistol_ammo",
+            price = 0,
+            amount = 10,
+            info = {},
+            type = "item",
+            slot = 9,
+        },
+        {
+            name = "smg_ammo",
+            price = 0,
+            amount = 10,
+            info = {},
+            type = "item",
+            slot = 10,
+        },
+        {
+            name = "shotgun_ammo",
+            price = 0,
+            amount = 10,
+            info = {},
+            type = "item",
+            slot = 11,
+        },
+        {
+            name = "rifle_ammo",
+            price = 0,
+            amount = 10,
+            info = {},
+            type = "item",
+            slot = 12,
+        },
+        {
+            name = "armor",
+            price = 0,
+            amount = 1,
+            info = {},
+            type = "item",
+            slot = 13,
+        },
+        {
+            name = "heavyarmor",
+            price = 0,
+            amount = 1,
+            info = {},
+            type = "item",
+            slot = 14,
+        },
+        {
+            name = "instant_camera",
+            price = 0,
+            amount = 1,
+            info = {},
+            type = "item",
+            slot = 15,
+        },
+        {
+            name = "megaphone",
+            price = 0,
+            amount = 1,
+            info = {},
+            type = "item",
+            slot = 16,
+        },
+    }
+}
+
+Config.Props = {
+    ["Conos"] = {
+        Text = 'el cono',
+        Animations = {
+            dict = nil,
+            anim = nil,
+            dictponer = "anim@heists@narcotics@trash",
+            animponer = "pickup"
+        },
+        Props = {
+            {
+                model = "prop_mp_cone_02",
+                bone = 71,
+                x = 0.70,
+                y = -0.25,
+                z = 0.00,
+                xr = 25.0,
+                yr = 270.0,
+                zr = 180.0,
+                physics = false,
+            },
+            {
+                model = "prop_roadcone01c",
+                bone = 71,
+                x = 0.90,
+                y = -0.35,
+                z = 0.00,
+                xr = 25.0,
+                yr = 270.0,
+                zr = 180.0,
+                physics = false,
+            },
+            {
+                model = "prop_air_conelight",
+                bone = 71,
+                x = 0.90,
+                y = -0.35,
+                z = 0.00,
+                xr = 25.0,
+                yr = 270.0,
+                zr = 180.0,
+                physics = false,
+            },
+            {
+                model = "prop_roadcone02c",
+                bone = 71,
+                x = 0.70,
+                y = -0.25,
+                z = 0.00,
+                xr = 25.0,
+                yr = 270.0,
+                zr = 180.0,
+                physics = false,
+            },
+            {
+                model = "prop_roadcone02a",
+                bone = 71,
+                x = 0.70,
+                y = -0.25,
+                z = 0.00,
+                xr = 25.0,
+                yr = 270.0,
+                zr = 180.0,
+                physics = false,
+            },
+            {
+                model = "prop_mp_cone_04",
+                bone = 71,
+                x = 0.90,
+                y = -0.35,
+                z = 0.00,
+                xr = 25.0,
+                yr = 270.0,
+                zr = 180.0,
+                physics = false,
+            },
+            {
+                model = "prop_roadcone02a",
+                bone = 71,
+                x = 0.70,
+                y = -0.25,
+                z = 0.00,
+                xr = 25.0,
+                yr = 270.0,
+                zr = 180.0,
+                physics = false,
+            },
+            {
+                model = "prop_roadcone02b",
+                bone = 71,
+                x = 0.70,
+                y = -0.25,
+                z = 0.00,
+                xr = 25.0,
+                yr = 270.0,
+                zr = 180.0,
+                physics = false,
+            },
+        }
+    },
+    ["Barreras"] = {
+        Text = 'la barrera',
+        Animations = {
+            dict = "anim@amb@nightclub@lazlow@ig1_vip@",
+            anim = "clubvip_base_laz",
+            dictponer = nil,
+            animponer = nil
+        },
+        Props = {
+            {
+                model = "prop_barrier_work01a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_work05",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_work06a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_wat_03b",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_work01a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "ba_prop_battle_barrier_02a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_mp_arrow_barrier_01",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_mp_barrier_01",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_mp_barrier_01b",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_mp_barrier_02",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_mp_barrier_02b",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_wat_03a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_wat_04a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_wat_04b",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 180.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_work01b",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_work01d",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_barrier_work02a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_mp_barrier_02",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_mp_barrier_02",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_mc_conc_barrier_01",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_mp_conc_barrier_01",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+        }
+    },
+    ["Señales de tráfico"] = {
+        Text = 'la señal',
+        Animations = {
+            dict = "anim@amb@nightclub@lazlow@ig1_vip@",
+            anim = "clubvip_base_laz",
+            dictponer = nil,
+            animponer = nil
+        },
+        Props = {
+            {
+                model = "prop_consign_02a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_consign_01a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_consign_01b",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+            {
+                model = "prop_consign_02a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+        }
+    },
+    ["Pinchos"] = {
+        Text = 'los pinchos',
+        Animations = {
+            dict = nil,
+            anim = nil,
+            dictponer = "pickup_object",
+            animponer = "pickup_low"
+        },
+        Props = {
+            {
+                model = "p_ld_stinger_s",
+                bone = 4103,
+                x = 0.0,
+                y = 0.5,
+                z = -1.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 0.0,
+                physics = false,
+            },
+        }
+    },
+    ["Radar"] = {
+        Text = 'el radar',
+        Animations = {
+            dict = "anim@amb@nightclub@lazlow@ig1_vip@",
+            anim = "clubvip_base_laz",
+            dictponer = nil,
+            animponer = nil
+        },
+        Props = {
+            {
+                model = "p_tv_cam_02_s",
+                bone = 4103,
+                x = 0.0,
+                y = 0.85,
+                z = 0.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 180.0,
+                physics = false,
+            },
+            {
+                model = "prop_cctv_pole_01a",
+                bone = 4103,
+                x = 0.0,
+                y = 0.85,
+                z = -7.0,
+                xr = 0.0,
+                yr = 0.0,
+                zr = 240.0,
+                physics = false,
+            },
+        }
+    }
+}
+
+Config.RandomNames = {
+    { -- Nombres
+        ["male"] = {
+            "Tyler",
+            "Jim",
+            "Derek",
+            "Jhon",
+            "Maverick",
+            "Yuuto",
+            "Eiden",
+            "Aiden",
+            "Nathan",
+            "Jay",
+            "Ray",
+            "Nael",
+            "Rick",
+            "Jason",
+            "Frank",
+            "John",
+            "Michael",
+            "Robert",
+            "David",
+            "James",
+            "William",
+            "Richard",
+            "Charles",
+            "Joseph",
+            "Thomas",
+            "Christopher",
+            "Daniel",
+            "Paul",
+            "Mark",
+            "Donald",
+            "George",
+            "Kenneth",
+            "Steven",
+            "Edward",
+            "Brian",
+            "Ronald",
+            "Anthony",
+            "Kevin",
+            "Jason",
+            "Matthew",
+            "Gary",
+            "Timothy",
+            "Jose",
+            "Larry",
+            "Jeffrey",
+            "Mike",
+        },
+        ["female"] = {
+            "Dannyel",
+            "Mirella",
+            "Zowy",
+            "Carolina",
+            "Chiara",
+            "Lauren",
+            "Veronica",
+            "Evelyn",
+            "Ray",
+            "Angela",
+            "Danitza",
+            "Noa",
+            "Naomi",
+            "Sarah",
+            "Sophie",
+            "Kiara",
+            "Akuma",
+            "Arch",
+            "Sandra",
+            "Alma",
+            "Kira",
+            "Daniel",
+        } 
+    },
+    { -- Apellidos
+        "Kawasaki",
+        "Leon",
+        "Locket",
+        "Williams",
+        "Scott",
+        "White",
+        "Rodriguez",
+        "Park",
+        "Charlin",
+        "Brooks",
+        "Hunter",
+        "Smith",
+        "Carter",
+        "Walker",
+        "Wallace",
+        "Stark",
+        "Berry",
+        "Troya",
+        "Street",
+        "Thompson",
+        "Salvatore",
+        "Miller",
+        "Clark",
+        "Jones",
+        "Black",
+        "Blue",
+        "Red",
+        "O Connor",
+        "O Neil",
+        "Oreo",
+        "Parker",
+        "Rivera",
+        "Martin",
+        "Diaz",
+        "Grimes",
+        "Walter",
+        "Smith",
+        "Johnson",
+        "Williams",
+        "Brown",
+        "Jones",
+        "García",
+        "Miller",
+        "Davis",
+        "Rodríguez",
+        "Martínez",
+        "Hernández",
+        "López",
+        "González",
+        "Pérez",
+        "Taylor",
+        "Anderson",
+        "Wilson",
+        "Jackson",
+        "Moore",
+        "Martin",
+        "Lee",
+        "Pérez",
+        "Harris",
+        "Clark",
+        "Lewis",
+        "Robinson",
+        "Walker",
+        "Hall",
+        "Allen",
+        "King",
+        "Nabosky"
+    }
+}
+
+function GetRandomName(m_o_f)
+    if not m_o_f or (m_o_f ~= "male" and m_o_f ~= "female") then
+        m_o_f = "male"
+    end
+    return Config.RandomNames[1][m_o_f][math.random(1, #Config.RandomNames[1][m_o_f])] .. " " .. Config.RandomNames[2][math.random(1, #Config.RandomNames[2])]
+end
+
+exports("GetRandomName", GetRandomName)
+
+Config.Evidences = {
+    ["Shoot"] = {
+        sprite = 41,
+        color = { r = 255, g = 255, b = 100 },
+        item = "evidence_a"
+    },
+    ["Impact"] = {
+        sprite = 6,
+        color = { r = 255, g = 128, b = 0 },
+        item = "evidence_n"
+    },
+    ["BloodRest"] = {
+        sprite = 20,
+        color = { r = 225, g = 0, b = 0 },
+        item = "evidence_r"
+    },
+    ["NpcBlood"] = {
+        sprite = 20,
+        color = { r = 225, g = 0, b = 0 },
+        item = "evidence_r"
+    },
+    ["VehCrash"] = {
+        sprite = 36,
+        color = {},
+        item = "evidence_b"
+    },
+    ["Drug"] = {
+        sprite = 20,
+        color = { r = 0, g = 200, b = 0 },
+        item = "evidence_v"
+    },
+}
+
+Config.Ammos = {
+    ["AMMO_PISTOL"] = "9x19mm [BAJO]",
+    ["AMMO_SMG"] = "9x19mm [BAJO]",
+    ["AMMO_RIFLE"] = "7.62x51mm [MEDIO]",
+    ["AMMO_MINIGUN"] = "7.62x51mm [MEDIO]",
+    ["AMMO_SHOTGUN"] = "Cartucho cal. 12 [ALTO]",
+    ["AMMO_SNIPER"] = "12.7x99mm [ALTO]",
+    ["AMMO_SNIPER_REMOTE"] = "12.7x99mm [ALTO]",
+    ["AMMO_GRENADELAUNCHER"] = "Explosivo",
+    ["AMMO_RPG"] = "Explosivo",
+    ["AMMO_FLARE"] = "Bengala",
+}
+
+Config.SecondsToCool = 600
+
+Config.K9 = {
+    Vehicles = {
+        [GetHashKey("exp")] = 4,
+        [GetHashKey("fbi2")] = 4,
+    },
+    IlegalItems = {
+        ["packaged_weed"] = true,
+        ["meth_bag"] = true,
+        ["cocaine_bag"] = true
+    }
+}
+
+Config.Federal = {
+    Spawn = vector4(1752.7030, 2504.3557, 45.5651, 28.7221),
+    Center = vector3(1693.4309, 2562.5601, 45.5646),
+    Exits = {
+        ["Mission Row"] = vector4(480.9431, -977.4430, 27.9842, 3.83),
+        ["La Mesa"] = vector4(814.8126, -1312.6895, 26.1861, 85.3),
+        ["Sandy Shores"] = vector4(1841.3585, 3671.2607, 33.8726, 208.0081),
+        ["Paleto Bay"] = vector4(-423.8767, 5993.2266, 31.4892, 312.2403),
+        ["Boling Broke"] = vector4(1848.2015, 2602.6997, 45.5993, 273.2811)
+    },
+    CamCoords = vector4(1828.8406, 2603.9912, 55.2284, 269.3494),
+    BusCoords = vector4(1852.8319, 2608.4592, 45.6727, 86.9280),
+    Finish = vector4(1804.9783, 2608.8894, 45.5665, 92.3074)
+
+}
+
+Config.Multifrec = {
+    frecuenciasSur = {
+        "ADAM-10",
+        "ADAM-20",
+        "ADAM-30",
+        "ADAM-40",
+        "ADAM-50",
+        "MARY-1",
+        "MARY-2",
+        "MARY-3",
+        "UNION-10",
+        "UNION-20",
+        "UNION-30",
+        "KING-10",
+        "KING-20",
+        "TOM-1",
+        "PEGASO-10",
+    },
+    frecuenciasNorte = {
+        "ALPHA-10",
+        "ALPHA-20",
+        "ALPHA-30",
+        "ALPHA-40",
+        "ALPHA-50",
+        "MIKE-1",
+        "MIKE-2",
+        "MIKE-3",
+        "BRAVO-10",
+        "BRAVO-20",
+        "BRAVO-30",
+        "CHARLIE-10",
+        "CHARLIE-20",
+        "FOXTROT-10",
+        "AGUILA-10",
+    },
+    frecuenciasEspeciales = {
+        "Central",
+        "Comisaria",
+        "Esperando asignación",
+        "TAC-01",
+        "TAC-02",
+        "TAC-03",
+        "TAC-04",
+        "DAVID-10",
+        "DAVID-20",
+        "DAVID-50",
+        "UNIDAD-K9",
+        "Oficina IAA",
+        "Oficina Investigación",
+    },
+    frecuenciasEMS = {
+        "Mando SAFD",
+        "Unidad Bomberos 1",
+        "Unidad Bomberos 2",
+        "Unidad Bomberos 3",
+        "Unidad EMS 1",
+        "Unidad EMS 2",
+        "Unidad EMS 3",
+        "Hospital",
+        "Parque de Bomberos"
+    }
+}
+
+exports("GetPoliceRadioChannels", function()
+    return Config.Multifrec
+end)
+
+Config.RequestsTime = 10 -- Minutos
+
+Config.MinimunGrades = {
+    ShowAgents = 1, -- Mostrar la seccion de agentes
+    DeleteBill = 3, -- Borrar multas
+}
+
+```
+
+### Step 6 - Setup Translations
+
+Contents for step 6.
+
+
+</Steps>
