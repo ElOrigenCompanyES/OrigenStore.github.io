@@ -1,0 +1,39 @@
+import { Steps } from 'nextra/components'
+
+# Installation
+
+<Steps>
+### Step 1 - Start Order
+
+In order for the resource to start correctly and not receive any errors, we must start the resources in the following order
+
+```cfg {3} showLineNumbers filename="server.cfg"
+ensure qb-core
+...
+ensure origen_races
+```
+
+### Step 2 - Setup SQL
+
+For the resource to work correctly, you need to import the SQL file into your database. You can find this file in the ```origen_races/races.sql``` folder of the resource.
+
+
+### Step 3 - Setup Config
+ 
+In order for the script to function properly, you must change the Config.Framework setting to your framework in this case it will be "qb-core". Feel free to make any other necessary changes as well.
+
+```lua {4-5, 6-7} showLineNumbers filename="config.lua"
+
+Config = {}
+
+Config.Framework = "qbcore" -- qbcore or esx [Default: qbcore] (Select the framework)
+
+
+```
+
+### Step 4 - Setup Translations
+
+Contents for step 6.
+
+
+</Steps>
