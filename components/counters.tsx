@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import styles from './counters.module.css'
-import '../static/styles.css'
 
 function MyButton() {
   const [count, setCount] = useState(0)
